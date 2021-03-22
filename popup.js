@@ -16,6 +16,18 @@ function decodeToken(token) {
 }
 
 chrome.tabs.executeScript({ file: 'tab.js' }, ([tokens]) => {
+  chrome.webRequest.onCompleted.addListener(
+    (details) => {
+      if (details.type !== "main_frame") return;
+      const otHeaders = details.responseHeaders.filter(
+        (h) => h.name.toLowerCase() === "origin-trial"
+      );
+      tokens.push(...otHeaders.map((h) => h.value));
+      render(tokens);
+    },
+    { urls: ["<all_urls>"] },
+    ["responseHeaders"]
+  );
   if (tokens.length > 0) {
     $('#no-token').remove()
   }
