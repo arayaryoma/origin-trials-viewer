@@ -15,9 +15,10 @@ function decodeToken(token) {
   return {version, signature, length, payload}
 }
 
-chrome.tabs.executeScript({ file: 'tab.js' }, ([tokens]) => {
+chrome.tabs.executeScript({ file: 'tab.js' }, ([metaTokens]) => {
+  const tokens = metaTokens.map(token => ({from: 'meta', token}))
   chrome.runtime.sendMessage(chrome.runtime.id, {}, {} , res => {
-    tokens.push(...res.tokens)
+    tokens.push(...res.tokens.map(token => ({from: 'header', token})))
     render(tokens)
   })
 })
@@ -26,7 +27,7 @@ function render(tokens) {
 if (tokens.length > 0) {
     $('#no-token').remove()
   }
-  tokens.forEach((token) => {
+  tokens.forEach(({from, token}) => {
     const decoded_token = decodeToken(token)
     const payload = decoded_token.payload
 
@@ -48,6 +49,7 @@ if (tokens.length > 0) {
 
     $clone.querySelector('.subdomain  + dd').textContent = !!payload.isSubdomain
     $clone.querySelector('.thirdparty + dd').textContent = !!payload.isThirdParty
+    $clone.querySelector('.from + dd').textContent = from
 
     $('#tokens').appendChild($clone)
   })
