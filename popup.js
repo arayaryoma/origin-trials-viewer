@@ -18,7 +18,7 @@ function decodeToken(token) {
 chrome.tabs.executeScript({ file: 'tab.js' }, ([metaTokens]) => {
   const tokens = metaTokens.map(token => ({from: 'meta', token}))
   chrome.runtime.sendMessage(chrome.runtime.id, {}, {} , res => {
-    tokens.push(...res.tokens.map(token => ({from: 'header', token})))
+    tokens.push(...res.tokens.map(token => ({from: 'http header field', token})))
     render(tokens)
   })
 })
